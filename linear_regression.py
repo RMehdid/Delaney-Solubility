@@ -4,30 +4,20 @@
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+import numpy as np
 
-if __name__ == '__main__':
 
-    # Data Loading
-    df = pd.read_csv("Resources/delaney_solubility_with_descriptors.csv")
-
-    # Data Preparation
-    y = df["logS"]
-    x = df.drop("logS", axis=1)
-
-    # Data Splitting
-    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=100)
-
-    # Linear Regression
+def linear_regression(x_train, y_train, x_test, y_test):
     lr = LinearRegression()
-    lr.fit(X_train, y_train)
+    lr.fit(x_train, y_train)
 
     # applying the model to make a prediction
 
-    y_lr_train_pred = lr.predict(X_train)
-    y_lr_test_pred = lr.predict(X_test)
+    y_lr_train_pred = lr.predict(x_train)
+    y_lr_test_pred = lr.predict(x_test)
 
     # Evaluate model performance
 
@@ -37,9 +27,15 @@ if __name__ == '__main__':
     lr_test_mse = mean_squared_error(y_test, y_lr_test_pred)
     lr_test_r2 = r2_score(y_test, y_lr_test_pred)
 
-    # Data Printing
-    lr_results = pd.DataFrame(["Linear Regression", lr_train_mse, lr_train_r2, lr_test_mse, lr_test_r2]).transpose()
-    lr_results.columns = ["Method", "Training MSE", "Training R2", "Testing MSE", "Testing R2"]
+    plt.figure(figsize=(5, 5))
+    plt.scatter(x=y_train, y=y_lr_train_pred, c="#7CAE00", alpha=0.3)
 
-    print(lr_results)
+    z = np.polyfit(y_train, y_lr_train_pred, 1)
+    p = np.poly1d(z)
 
+    plt.plot(y_train, p(y_train), '#F8766D')
+    plt.ylabel("Predict logS")
+    plt.xlabel("Experimental logS")
+    plt.show()
+
+    return pd.DataFrame(["Linear Regression", lr_train_mse, lr_train_r2, lr_test_mse, lr_test_r2]).transpose()
